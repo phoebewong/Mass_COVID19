@@ -1,0 +1,12 @@
+name: Mass_COVID19
+title: Mass_COVID19
+username:
+account: phoebe
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2146817
+bundleId: 3035905
+url: https://phoebe.shinyapps.io/Mass_COVID19/
+when: 1587332486.66403
+asMultiple: FALSE
+asStatic: FALSE

@@ -6,12 +6,20 @@ library(ggthemes)
 palettes <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]][["Tableau 10"]]
 
 #### Read in data ####
-df <- read_docx("../data/covid-19-case-report-4-18-2020.docx")
+df <- read_docx("data/covid-19-case-report-4-18-2020.docx")
 tbls <- docx_extract_all_tbls(df)
 
 function(input, output) {
-    #### Read in data ####
-    
+    #### Menu help text ####
+    output$menu <- renderMenu({
+        # Invalidate (and re-run) this code once every second
+        invalidateLater(1000*60*60)
+        
+        sidebarMenu(
+            menuItem(Sys.Date())
+        )
+    })
+    #### County plot ####
     output$county_bar <- renderPlot({
         #### Preprocess ####
         county_df <- tbls[[1]]
