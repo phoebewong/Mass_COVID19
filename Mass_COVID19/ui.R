@@ -7,7 +7,8 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
     # Boxes need to be put in a row (or column)
     fluidRow(
-        box(plotOutput("county_bar"), width = 12)#,
+        box(plotOutput("county_bar")),
+        box(plotOutput("gender_bar"))
         # box(
         #     title = "Controls",
         #     sliderInput("slider", "Number of observations:", 1, 100, 50)
