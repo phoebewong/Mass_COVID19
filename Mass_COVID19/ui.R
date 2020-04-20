@@ -4,7 +4,6 @@ library(shinydashboardPlus)
 sidebar <- dashboardSidebar(
     sidebarMenu(
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-    menuItem("Data Source", tabName = "data", icon = icon("table") ),
     menuItem("More Information", tabName = "info", icon = icon("info"))
     )
 )
@@ -51,9 +50,6 @@ body <- dashboardBody(
                             plotOutput("city_bar"),
                             checkboxInput("topcount", "Show in absolute count", FALSE))
                 )),
-        tabItem(tabName = "data",
-                fluidRow(
-                    box(includeMarkdown('data.md'), width = 12))),
         tabItem(tabName = "info",
                 fluidRow(
                     box(includeMarkdown('info.md'), width = 12))
