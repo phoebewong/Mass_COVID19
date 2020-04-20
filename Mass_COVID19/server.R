@@ -26,6 +26,7 @@ function(input, output) {
     })
     #### Menu help text ####
     output$menu <- renderMenu({
+        # TODO: add last update time
         # Invalidate (and re-run) this code once every second
         invalidateLater(1000*60*60)
         
@@ -49,10 +50,11 @@ function(input, output) {
             ggplot(aes(x = category, y = num_case)) +
             geom_bar(stat = "identity", fill = palettes$value[1]) +
             geom_text(aes(label = num_case), vjust = -0.3, size = 3) +
-            labs(x = "", y = "Number of Cases", title = "Number of COVID-19 cases in Massachusetts") +
+            labs(x = "", y = "Number of Cases", title = "Number of cases by County") +
             theme_minimal() +
             theme(axis.text.x = element_text(angle = 45), 
-                  axis.title.x = element_blank())
+                  axis.title.x = element_blank(),
+                  plot.title = element_text(face = "bold"))
         county_bar
     })
     
@@ -64,11 +66,12 @@ function(input, output) {
             ggplot(aes(x=category, y = perc)) +
             geom_bar(stat = "identity", fill = palettes$value[1]) +
             geom_text(aes(y = perc, label = scales::percent(perc)), vjust = -0.4, size = 4) +
-            labs(x = "", y = "Number of Cases", title = "Number of COVID-19 cases in Massachusetts - Gender") +
+            labs(x = "", y = "Number of Cases", title = "Number of cases by Gender") +
             scale_y_continuous(labels = scales::percent) +
             scale_fill_tableau() +
             theme_minimal() +
-            theme(axis.title.x = element_blank())
+            theme(axis.title.x = element_blank(),
+                  plot.title = element_text(face = "bold"))
         gender_bar
         
     })
