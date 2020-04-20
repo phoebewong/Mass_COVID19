@@ -1,9 +1,11 @@
 library(shinydashboard)
 library(shinydashboardPlus)
+library(plotly)
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
     menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+    menuItem("Cumulative View", tabName = "track", icon = icon("signal")),
     menuItem("More Information", tabName = "info", icon = icon("info"))
     )
 )
@@ -50,6 +52,22 @@ body <- dashboardBody(
                             plotOutput("city_bar"),
                             checkboxInput("topcount", "Show in absolute count", FALSE))
                 )),
+        tabItem(tabName = "track",
+                fluidRow(
+                    boxPlus(title = "Cumulative Confirmed Cases",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            plotlyOutput("num_case_line")),
+                    boxPlus(title = "Cumulative COVID-19 Related Deaths",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            "Coming soon")
+                    
+        )),
         tabItem(tabName = "info",
                 fluidRow(
                     box(includeMarkdown('info.md'), width = 12))
