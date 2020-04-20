@@ -5,14 +5,15 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+    # Value boxes
+    fluidRow(
+        valueBoxOutput("num_case_box"),
+        valueBoxOutput("death_count")
+    ),
     # Boxes need to be put in a row (or column)
     fluidRow(
         box(plotOutput("county_bar")),
         box(plotOutput("gender_bar"))
-        # box(
-        #     title = "Controls",
-        #     sliderInput("slider", "Number of observations:", 1, 100, 50)
-        # )
     ))
     
 dashboardPage(

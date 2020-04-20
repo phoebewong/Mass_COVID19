@@ -6,14 +6,24 @@ library(ggthemes)
 palettes <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]][["Tableau 10"]]
 
 #### Read in data ####
-df <- read_docx("data/covid-19-case-report-4-18-2020.docx")
+df <- docxtractr::read_docx("data/covid-19-case-report-4-18-2020.docx")
 tbls <- docx_extract_all_tbls(df)
 tbls[[1]] <- tbls[[1]] %>% 
     rename(category = CATEGORY,
            num_case = NUMBER.OF.CONFIRMED.CASES) %>% 
     mutate(num_case = as.numeric(num_case)) # change to numeric
 
+
 function(input, output) {
+    #### Value boxes ####
+    output$num_case_box <- renderValueBox({
+        valueBox(tbls[[2]]$Confirmed.CasesN.... %>% last() %>% as.numeric(), 
+                 "Reported Confirmed Cases", icon = icon('user-circle'), color = "orange")
+    })
+    output$death_count <- renderValueBox({
+        valueBox(tbls[[2]]$DeathsN.... %>% last() %>% as.numeric(), 
+                 "Total Deaths", color = "maroon")
+    })
     #### Menu help text ####
     output$menu <- renderMenu({
         # Invalidate (and re-run) this code once every second
@@ -48,15 +58,6 @@ function(input, output) {
     
     #### Gender plot ####
     output$gender_bar <- renderPlot({
-        #### Preprocess ####
-        gender_df <- tbls[[1]]
-        # Remove unrelated rows, before "Sex"
-        gender_df <- gender_df[(which(gender_df$category == "Sex")+1):(which(gender_df$category == "Age Group")-1),]
-        
-        # Rename column
-        gender_df <- gender_df %>% 
-            mutate(gender = fct_reorder(category, desc(num_case)))
-        
         #### Plot ####
         gender_bar <- gender_df %>% 
             mutate(perc=num_case/sum(num_case)) %>%
