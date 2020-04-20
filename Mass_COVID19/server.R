@@ -2,18 +2,22 @@ library(shinydashboard)
 library(tidyverse)
 library(docxtractr)
 library(ggthemes)
+library(glue)
 
 palettes <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]][["Tableau 10"]]
 
 #### Read in data ####
-df <- docxtractr::read_docx("data/covid-19-case-report-4-18-2020.docx")
+df <- docxtractr::read_docx("data/covid-19-case-report-4-19-2020.docx")
 tbls <- docx_extract_all_tbls(df)
 tbls[[1]] <- tbls[[1]] %>% 
     rename(category = CATEGORY,
            num_case = NUMBER.OF.CONFIRMED.CASES) %>% 
     mutate(num_case = as.numeric(num_case)) # change to numeric
+# City data (weekly)
+city_word <- docxtractr::read_docx("data/covid-19-city-town-4-14-2020.docx")
+city_df <- docx_extract_all_tbls(city_word)[[1]]
 
-
+#### server ####
 function(input, output) {
     #### Value boxes ####
     output$num_case_box <- renderValueBox({
@@ -24,14 +28,13 @@ function(input, output) {
         valueBox(tbls[[2]]$DeathsN.... %>% last() %>% as.numeric(), 
                  "Total Deaths", color = "maroon")
     })
-    #### Menu help text ####
-    output$menu <- renderMenu({
-        # TODO: add last update time
-        # Invalidate (and re-run) this code once every second
-        invalidateLater(1000*60*60)
-        
+    #### TODO: last update time ####
+    output$menu_date <- renderMenu({
+        # TODO: add actual last update time
+        # # Invalidate (and re-run) this code once every second
+        # invalidateLater(1000*60*60)
         sidebarMenu(
-            menuItem(Sys.Date())
+            menuItem(paste("Last Update:", Sys.Date()))
         )
     })
     #### County plot ####
@@ -104,7 +107,7 @@ function(input, output) {
                   plot.title = element_text(face = "bold"))
         gender_bar
     })
-    
+    #### Age plot ####
     output$age_bar <- renderPlot({
         #### Preprocess ####
         age_df <- tbls[[1]]
@@ -140,5 +143,44 @@ function(input, output) {
                   plot.title = element_text(face = "bold"))
         age_bar
     })
-
+    #### city plot ####
+    output$city_bar <- renderPlot({
+        city_df <- city_df %>% 
+            rename(city = City.Town,
+                   count = Count,
+                   rate = Rate.) %>% 
+            # TODO: clean up less than 5 and 0
+            mutate(count = as.numeric(count), 
+                   rate = as.numeric(rate)) %>% 
+            filter(city != "State Total")
+        
+        # Top count
+        if (input$topcount){
+            city_bar <- city_df %>% 
+                mutate(city = fct_reorder(city, desc(count))) %>% 
+                top_n(input$top_num, count) %>% 
+                ggplot(aes(x = city, y = count)) +
+                geom_bar(stat = "identity", fill = palettes$value[1]) +
+                geom_text(aes(label = count), vjust = -0.4, size = 4) +
+                labs(y = "Number of Cases",
+                     title = glue("Top {input$top_num} Cities by Count"))
+        } else {
+            # top rate
+            city_bar <- city_df %>% 
+                mutate(city = fct_reorder(city, desc(rate))) %>% 
+                top_n(input$top_num, rate) %>% 
+                ggplot(aes(x = city, y = rate)) +
+                geom_bar(stat = "identity", fill = palettes$value[1]) +
+                geom_text(aes(label = round(rate)), vjust = -0.4, size = 4) +
+                labs(y = "Number of Cases", title = glue("Top {input$top_num} Cities by Rate"),
+                     subtitle = "Rate: # of cases per 100,000 people") 
+        }
+        city_bar <- city_bar + 
+            theme_minimal() +
+            theme(axis.text.x = element_text(angle = 45),
+                axis.title.x = element_blank(),
+                plot.title = element_text(face = "bold"))
+        city_bar
+        
+    })
 }
