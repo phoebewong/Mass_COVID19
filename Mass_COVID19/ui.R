@@ -1,6 +1,7 @@
 library(shinydashboard)
 
 sidebar <- dashboardSidebar(
+    checkboxInput("perc_box", "Show in %", FALSE),
     sidebarMenuOutput("menu")
 )
 
@@ -13,7 +14,8 @@ body <- dashboardBody(
     # Boxes need to be put in a row (or column)
     fluidRow(
         box(plotOutput("county_bar")),
-        box(plotOutput("gender_bar"))
+        box(plotOutput("gender_bar")),
+        box(plotOutput("age_bar"))
     ))
     
 dashboardPage(
