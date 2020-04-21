@@ -71,13 +71,13 @@ body <- dashboardBody(
                             status = 'primary',
                             collapsible=TRUE,
                             closable=FALSE,
-                            "Coming soon"),
+                            plotlyOutput("daily_num_case_line")),
                     boxPlus(title = "Daily Deaths",
                             solidHeader = FALSE,
                             status = 'primary',
                             collapsible=TRUE,
                             closable=FALSE,
-                            "Coming soon")
+                            plotlyOutput("daily_death_line"))
                     
         )),
         tabItem(tabName = "info",
