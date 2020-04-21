@@ -1,7 +1,7 @@
-# Last Update: Apr 19, 2020
+# Data as of: Apr 19, 2020
 
 # Data
-The data shown in plots comes from [Massachusetts Department of Public Health](https://www.mass.gov/info-details/covid-19-cases-quarantine-and-monitoring). 
+The data shown in plots comes from the archive data from [Massachusetts Department of Public Health](https://www.mass.gov/info-details/covid-19-cases-quarantine-and-monitoring). Note that DPH changed the data format since Apr 20, 2020. Therefore, some re-engineering is needed to continue the daily update.
 
 Confirmed cases data is published daily. 
 

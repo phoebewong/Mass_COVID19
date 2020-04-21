@@ -3,11 +3,12 @@ library(tidyverse)
 library(docxtractr)
 library(ggthemes)
 library(glue)
+library(plotly)
 
 palettes <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]][["Tableau 10"]]
 
 #### Read in data ####
-df <- docxtractr::read_docx("data/covid-19-case-report-4-19-2020.docx")
+df <- docxtractr::read_docx("data/hist/covid-19-case-report-4-19-2020.docx")
 tbls <- docx_extract_all_tbls(df)
 tbls[[1]] <- tbls[[1]] %>% 
     rename(category = CATEGORY,
@@ -16,6 +17,10 @@ tbls[[1]] <- tbls[[1]] %>%
 # City data (weekly)
 city_word <- docxtractr::read_docx("data/covid-19-city-town-4-14-2020.docx")
 city_df <- docx_extract_all_tbls(city_word)[[1]]
+
+# Pre-processed numbers
+num_case_trace_df <- readRDS("data/hist/num_case_trace_df.rds")
+death_trace_df <- readRDS("data/hist/death_trace_df.rds")
 
 #### server ####
 function(input, output) {
@@ -181,6 +186,60 @@ function(input, output) {
                 axis.title.x = element_blank(),
                 plot.title = element_text(face = "bold"))
         city_bar
-        
+    })
+    output$num_case_line <- renderPlotly({
+        g <- ggplot(num_case_trace_df, aes(x = date, y = total)) +
+            geom_line(color = palettes$value[1]) +
+            theme_minimal() +
+            labs(y = "Number of Confirmed Cases",
+                 title = "Cumumlative Number of Confirmed Cases") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)))
+        g <- ggplotly(g)
+    })
+    
+    output$daily_num_case_line <- renderPlotly({
+        g <- ggplot(num_case_trace_df, aes(x = date, y = daily)) +
+            geom_line(color = palettes$value[1]) +
+            theme_minimal() +
+            labs(y = "Number of Confirmed Cases",
+                 title = "Daily Number of Confirmed Cases") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+        g <- ggplotly(g)
+    })
+    
+    output$death_line <- renderPlotly({
+        g <- ggplot(death_trace_df, aes(x = date, y = total)) +
+            geom_line(color = palettes$value[1]) +
+            theme_minimal() +
+            labs(y = "Cumumlative Number of Deaths",
+                 title = "Cumumlative Number of Deaths by Date") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+        g <- ggplotly(g)
+    })
+    
+    output$daily_death_line <- renderPlotly({
+        g <- ggplot(death_trace_df, aes(x = date, y = daily)) +
+            geom_line(color = palettes$value[1]) +
+            theme_minimal() +
+            labs(y = "Number of Deaths",
+                 title = "Daily Number of Deaths") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+        g <- ggplotly(g)
     })
 }
