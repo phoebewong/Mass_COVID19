@@ -18,7 +18,9 @@ tbls[[1]] <- tbls[[1]] %>%
 city_word <- docxtractr::read_docx("data/covid-19-city-town-4-14-2020.docx")
 city_df <- docx_extract_all_tbls(city_word)[[1]]
 
+# Pre-processed numbers
 num_case_trace_df <- readRDS("data/hist/num_case_trace_df.rds")
+death_trace_df <- readRDS("data/hist/death_trace_df.rds")
 
 #### server ####
 function(input, output) {
@@ -196,6 +198,19 @@ function(input, output) {
             theme_minimal() +
             theme(axis.title.x = element_blank(),
                   axis.text.x = element_text(angle=45,margin = margin(t = 20)))
+        g <- ggplotly(g)
+    })
+    output$death_line <- renderPlotly({
+        g <- ggplot(death_trace_df, aes(x = date, y = total)) +
+            geom_line(color = palettes$value[1]) +
+            theme_minimal() +
+            labs(y = "Cumumlative Number of Deaths",
+                 title = "Cumumlative Number of Deaths by Date") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
         g <- ggplotly(g)
     })
 }

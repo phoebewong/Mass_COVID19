@@ -65,6 +65,18 @@ body <- dashboardBody(
                             status = 'primary',
                             collapsible=TRUE,
                             closable=FALSE,
+                            plotlyOutput("death_line")),
+                    boxPlus(title = "Daily Confirmed Cases",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            "Coming soon"),
+                    boxPlus(title = "Daily Deaths",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
                             "Coming soon")
                     
         )),
