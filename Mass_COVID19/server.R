@@ -4,6 +4,8 @@ library(docxtractr)
 library(ggthemes)
 library(glue)
 library(plotly)
+library(lubridate)
+library(ggpubr)
 
 palettes <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]][["Tableau 10"]]
 
@@ -21,6 +23,22 @@ city_df <- docx_extract_all_tbls(city_word)[[1]]
 # Pre-processed numbers
 num_case_trace_df <- readRDS("data/hist/num_case_trace_df.rds")
 death_trace_df <- readRDS("data/hist/death_trace_df.rds")
+hist_county_df <- readRDS("data/hist/hist_county_df.rds")
+
+# Census
+census_county_df <- read_csv("data/census/co-est2019-alldata.csv") %>% 
+    filter(STNAME == "Massachusetts") %>% 
+    filter(CTYNAME != "Massachusetts") %>% 
+    mutate(CTYNAME = gsub(" County", "", CTYNAME))
+
+# County per capita
+hist_county_df_per_capita <- hist_county_df %>% 
+    # Update to datetime object
+    mutate(date = mdy(date)) %>% 
+    arrange(date) %>% 
+    filter(date == last(date)) %>% # last date of historical confirmed cases April 19
+    filter(category != "Unknown") %>% # remove unknown
+    left_join(census_county_df %>% select(CTYNAME, POPESTIMATE2019), by = c("category" = "CTYNAME"))
 
 #### server ####
 function(input, output) {
@@ -187,6 +205,7 @@ function(input, output) {
                 plot.title = element_text(face = "bold"))
         city_bar
     })
+    #### Tracking ####
     output$num_case_line <- renderPlotly({
         g <- ggplot(num_case_trace_df, aes(x = date, y = total)) +
             geom_line(color = palettes$value[1]) +
@@ -197,7 +216,8 @@ function(input, output) {
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45,margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
     
@@ -211,7 +231,8 @@ function(input, output) {
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
     
@@ -219,13 +240,14 @@ function(input, output) {
         g <- ggplot(death_trace_df, aes(x = date, y = total)) +
             geom_line(color = palettes$value[1]) +
             theme_minimal() +
-            labs(y = "Cumumlative Number of Deaths",
+            labs(y = "Number of Deaths",
                  title = "Cumumlative Number of Deaths by Date") +
             scale_fill_tableau() +
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
     
@@ -239,7 +261,24 @@ function(input, output) {
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
+    })
+    
+    output$county_per_cap_reg_line <- renderPlot({
+        g <- ggplot(hist_county_df_per_capita, aes(x=POPESTIMATE2019, y = num_case, label = category)) +
+            geom_point() +
+            geom_text(hjust = 0, nudge_x = 10, nudge_y = 300) +
+            stat_smooth(method = "lm", color = palettes$value[1]) +
+            stat_regline_equation(aes(label = ..rr.label..), 
+                                  formula = hist_county_df_per_capita$num_case~hist_county_df_per_capita$POPESTIMATE2019) +
+            labs(x="County Population (2019)", y="Total Confirmed Cases",
+                 title = "Number of Confirmed Cases vs County Population") + 
+            scale_x_continuous(labels = scales::unit_format(unit = "k", scale = 1e-3)) + # in thousands
+            coord_cartesian(xlim = c(0, 1700000)) + 
+            theme_minimal() +
+            theme(plot.title = element_text(face = "bold"))
+        g
     })
 }
