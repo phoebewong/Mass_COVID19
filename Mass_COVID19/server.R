@@ -202,6 +202,22 @@ function(input, output) {
                   plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
+    ## Overlay tracking - Num case ##
+    output$num_case_overlay <- renderPlotly({
+        g <- ggplot(num_case_trace_df) +
+            geom_bar(aes(x = date, y = total), stat = "identity", fill = palettes$value[1]) +
+            geom_line(aes(x = date, y = daily), color = palettes$value[2]) + 
+            theme_minimal() +
+            labs(y = "Number of Confirmed Cases",
+                 title = "Number of Confirmed Cases") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g <- ggplotly(g)
+    })
     
     output$death_line <- renderPlotly({
         g <- ggplot(death_trace_df, aes(x = date, y = total)) +
@@ -229,6 +245,22 @@ function(input, output) {
             theme_minimal() +
             theme(axis.title.x = element_blank(),
                   axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g <- ggplotly(g)
+    })
+    ## Overlay tracking - Death ##
+    output$death_overlay <- renderPlotly({
+        g <- ggplot(death_trace_df) +
+            geom_bar(aes(x = date, y = total), stat = "identity", fill = palettes$value[1]) +
+            geom_line(aes(x = date, y = daily), color = palettes$value[2]) + 
+            theme_minimal() +
+            labs(y = "Number of Deaths",
+                 title = "Number of Deaths") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
                   plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
