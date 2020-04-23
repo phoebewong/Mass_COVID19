@@ -1,5 +1,10 @@
 # Global variables
+library(tidyverse)
+library(docxtractr)
 library(ggthemes)
+library(lubridate)
+library(ggpubr)
+
 palettes <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]][["Tableau 10"]]
 
 #### Read in data ####
