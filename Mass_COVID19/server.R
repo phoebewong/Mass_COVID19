@@ -4,23 +4,8 @@ library(docxtractr)
 library(ggthemes)
 library(glue)
 library(plotly)
-
-palettes <- ggthemes_data[["tableau"]][["color-palettes"]][["regular"]][["Tableau 10"]]
-
-#### Read in data ####
-df <- docxtractr::read_docx("data/hist/covid-19-case-report-4-19-2020.docx")
-tbls <- docx_extract_all_tbls(df)
-tbls[[1]] <- tbls[[1]] %>% 
-    rename(category = CATEGORY,
-           num_case = NUMBER.OF.CONFIRMED.CASES) %>% 
-    mutate(num_case = as.numeric(num_case)) # change to numeric
-# City data (weekly)
-city_word <- docxtractr::read_docx("data/covid-19-city-town-4-14-2020.docx")
-city_df <- docx_extract_all_tbls(city_word)[[1]]
-
-# Pre-processed numbers
-num_case_trace_df <- readRDS("data/hist/num_case_trace_df.rds")
-death_trace_df <- readRDS("data/hist/death_trace_df.rds")
+library(lubridate)
+library(ggpubr)
 
 #### server ####
 function(input, output) {
@@ -187,6 +172,7 @@ function(input, output) {
                 plot.title = element_text(face = "bold"))
         city_bar
     })
+    #### Tracking ####
     output$num_case_line <- renderPlotly({
         g <- ggplot(num_case_trace_df, aes(x = date, y = total)) +
             geom_line(color = palettes$value[1]) +
@@ -197,7 +183,8 @@ function(input, output) {
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45,margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
     
@@ -211,7 +198,24 @@ function(input, output) {
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g <- ggplotly(g)
+    })
+    ## Overlay tracking - Num case ##
+    output$num_case_overlay <- renderPlotly({
+        g <- ggplot(num_case_trace_df) +
+            geom_bar(aes(x = date, y = total), stat = "identity", fill = palettes$value[1]) +
+            geom_line(aes(x = date, y = daily), color = palettes$value[2]) + 
+            theme_minimal() +
+            labs(y = "Number of Confirmed Cases",
+                 title = "Number of Confirmed Cases") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
     
@@ -219,13 +223,14 @@ function(input, output) {
         g <- ggplot(death_trace_df, aes(x = date, y = total)) +
             geom_line(color = palettes$value[1]) +
             theme_minimal() +
-            labs(y = "Cumumlative Number of Deaths",
+            labs(y = "Number of Deaths",
                  title = "Cumumlative Number of Deaths by Date") +
             scale_fill_tableau() +
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
     
@@ -239,7 +244,59 @@ function(input, output) {
             scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
             theme_minimal() +
             theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle=45, margin = margin(t = 20)))
+                  axis.text.x = element_text(angle=45, margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
+    ## Overlay tracking - Death ##
+    output$death_overlay <- renderPlotly({
+        g <- ggplot(death_trace_df) +
+            geom_bar(aes(x = date, y = total), stat = "identity", fill = palettes$value[1]) +
+            geom_line(aes(x = date, y = daily), color = palettes$value[2]) + 
+            theme_minimal() +
+            labs(y = "Number of Deaths",
+                 title = "Number of Deaths") +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g <- ggplotly(g)
+    })
+    
+    output$county_per_cap_reg_line <- renderPlot({
+        g <- ggplot(hist_county_df_per_capita, aes(x=POPESTIMATE2019, y = num_case, label = category)) +
+            geom_point() +
+            geom_text(hjust = 0, nudge_x = 10, nudge_y = 300) +
+            stat_smooth(method = "lm", color = palettes$value[1]) +
+            stat_regline_equation(aes(label = ..rr.label..), 
+                                  formula = hist_county_df_per_capita$num_case~hist_county_df_per_capita$POPESTIMATE2019) +
+            labs(x="County Population (2019)", y="Total Confirmed Cases",
+                 title = "Number of Confirmed Cases vs County Population") + 
+            scale_x_continuous(labels = scales::unit_format(unit = "k", scale = 1e-3)) + # in thousands
+            coord_cartesian(xlim = c(0, 1700000)) + 
+            theme_minimal() +
+            theme(plot.title = element_text(face = "bold"))
+        g
+    })
+    #### Map ####
+    # shinyServer(function(input, output) {
+    #     output$Image <- renderImage({
+    #         filename <- normalizePath(file.path('www/maps',
+    #                                             paste(input$route, '.png', sep='')))
+    #         list(src = filename,
+    #              alt = paste("Image number", input$route))
+    #         
+    #     }, deleteFile = FALSE)
+    # })
+    
+    
+    output$map_city <- renderImage({
+        outfile = "data/map/covid19_422.png"
+        list(src = outfile,
+             # width = width,
+             # height = height,
+             alt = "City Map - April 22")
+    }, deleteFile = FALSE)
 }
