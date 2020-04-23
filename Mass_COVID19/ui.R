@@ -6,12 +6,14 @@ sidebar <- dashboardSidebar(
     sidebarMenu(
     menuItem("Overview", tabName = "track", icon = icon("signal")),
     menuItem("Numbers By Group", tabName = "dashboard", icon = icon("dashboard")),
+    menuItem("Map", tabName = "map", icon = icon("map")),
     menuItem("More Information", tabName = "info", icon = icon("info"))
     )
 )
 
 body <- dashboardBody(
     tabItems(
+        #### Dashboard tab ####
         tabItem(tabName = "dashboard",
                 # Boxes need to be put in a row (or column)
                 fluidRow(
@@ -47,6 +49,7 @@ body <- dashboardBody(
                             plotOutput("city_bar"),
                             checkboxInput("topcount", "Show in absolute count", FALSE))
                 )),
+        #### Track tab ####
         tabItem(tabName = "track",
                 # Value boxes
                 fluidRow(
@@ -84,6 +87,18 @@ body <- dashboardBody(
                             # plotlyOutput("daily_death_line"))
                             # 
         )),
+        #### Map ####
+        tabItem(tabName = "map",
+                # Boxes need to be put in a row (or column)
+                fluidRow(
+                    # imageOutput("map_city", width = '10px')
+                    h3("Map - City (As of Apr 22, updated every Wed)"),
+                    img(src = "covid19_422.png", width = '1300 px'),
+                    h5("Created by Jessy Han")
+                    )
+                ),
+
+         #### Info tab ####
         tabItem(tabName = "info",
                 fluidRow(
                     box(includeMarkdown('info.md'), width = 12),

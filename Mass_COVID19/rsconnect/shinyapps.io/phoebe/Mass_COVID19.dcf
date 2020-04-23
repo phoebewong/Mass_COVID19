@@ -5,9 +5,9 @@ account: phoebe
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2146817
-bundleId: 3048164
+bundleId: 3052115
 url: https://phoebe.shinyapps.io/Mass_COVID19/
-when: 1587533143.5718
+when: 1587593006.21842
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: data.html|info.html|parse_hist_word_doc.Rmd|parse_pdf.Rmd|parse_word_doc.Rmd
