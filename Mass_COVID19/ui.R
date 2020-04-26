@@ -16,7 +16,6 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
     tabItems(
-        
         #### Overview tab ####
         tabItem(tabName = "track",
                 # Value boxes
@@ -54,16 +53,24 @@ body <- dashboardBody(
                             collapsible=TRUE,
                             closable=FALSE,
                             # width = 12,
-                            plotOutput("city_trace_num")
-                    ),
+                            plotOutput("city_trace_num")),
                     boxPlus(title = "Rate (per 100k) by City",
                             solidHeader = FALSE,
                             status = 'primary',
                             collapsible=TRUE,
                             closable=FALSE,
                             # width = 12,
-                            plotOutput("city_trace_rate")
-                    )
+                            plotOutput("city_trace_rate")),
+                    boxPlus(title = "City (Weekly Update)",
+                            footer = "Last update: 4/14/2020",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            sliderInput("top_num", "Number of cities to show",
+                                        min = 0, max = 352, value = 20),
+                            plotOutput("city_bar"),
+                            checkboxInput("topcount", "Show in absolute count", FALSE))
                     )
                 ),
                 
@@ -91,17 +98,7 @@ body <- dashboardBody(
                             status = 'primary',
                             collapsible=TRUE,
                             closable=FALSE,
-                            plotOutput("age_bar")),
-                    boxPlus(title = "City (Weekly Update)",
-                            footer = "Last update: 4/14/2020",
-                            solidHeader = FALSE,
-                            status = 'primary',
-                            collapsible=TRUE,
-                            closable=FALSE,
-                            sliderInput("top_num", "Number of cities to show",
-                                        min = 0, max = 352, value = 20),
-                            plotOutput("city_bar"),
-                            checkboxInput("topcount", "Show in absolute count", FALSE))
+                            plotOutput("age_bar"))
                 )),
         #### Map ####
         tabItem(tabName = "map",
