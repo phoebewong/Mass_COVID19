@@ -135,14 +135,15 @@ function(input, output) {
     })
     #### city plot ####
     output$city_bar <- renderPlot({
-        city_df <- city_df %>% 
-            rename(city = City.Town,
-                   count = Count,
-                   rate = Rate.) %>% 
-            # TODO: clean up less than 5 and 0
-            mutate(count = as.numeric(count), 
-                   rate = as.numeric(rate)) %>% 
-            filter(city != "State Total")
+        city_df <- city_df_all %>% 
+            filter(date == last(date))
+            # rename(city = City.Town,
+            #        count = Count,
+            #        rate = Rate.) %>% 
+            # # TODO: clean up less than 5 and 0
+            # mutate(count = as.numeric(count), 
+            #        rate = as.numeric(rate)) %>% 
+            # filter(city != "State Total")  # most up to date
         
         # Top count
         if (input$topcount){
