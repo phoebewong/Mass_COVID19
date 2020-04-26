@@ -299,4 +299,48 @@ function(input, output) {
              # height = height,
              alt = "City Map - April 22")
     }, deleteFile = FALSE)
+    
+    #### city trace plot ####
+    output$city_trace_num <- renderPlot({
+        top_10_cities_cnt_now <- city_df_all %>%
+            filter(date == last(date)) %>%   # take latest date
+            top_n(n=10, count) %>%  # top 10 count
+            pull(city)
+        
+        # Show those top n cities
+        city_df_all %>% 
+            filter(city %in% top_10_cities_cnt_now) %>% 
+            ggplot(aes(x=date, y = count, color = city)) +
+            geom_line() +
+            labs(y="Number of Confirmed Cases", 
+                 # title = "Number of Confirmed COVID-19 Cases by City",
+                 title = "Top 10 cities with highest number of confirmed cases",
+                 subtitle = glue("Data as of {last(city_df_all$date)}")) +
+            scale_color_tableau() + 
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  plot.title = element_text(face = "bold"))
+        
+    })
+    
+    output$city_trace_rate <- renderPlot({
+        top_10_cities_rate_now <- city_df_all %>% 
+            filter(city != "Unknown1") %>% # filter out unknown
+            filter(date == last(date)) %>% # take latest date
+            top_n(n=10, count) %>%  # top 10 count
+            pull(city)
+        
+        city_df_all %>% 
+            filter(city %in% top_10_cities_rate_now) %>% 
+            ggplot(aes(x=date, y = rate, color = city)) +
+            geom_line() +
+            scale_color_tableau() + 
+            labs(y="Rate per 100k population", 
+                 # title = "Rate (per 100k) of Confirmed COVID-19 Cases by City ",
+                 title = "Top 10 cities with highest rate",
+                 subtitle = glue("Data as of {last(city_df_all$date)}")) +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  plot.title = element_text(face = "bold"))
+    })
 }

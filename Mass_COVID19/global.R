@@ -15,7 +15,7 @@ tbls[[1]] <- tbls[[1]] %>%
          num_case = NUMBER.OF.CONFIRMED.CASES) %>% 
   mutate(num_case = as.numeric(num_case)) # change to numeric
 # City data (weekly)
-city_word <- docxtractr::read_docx("data/covid-19-city-town-4-14-2020.docx")
+city_word <- docxtractr::read_docx("data/city/covid-19-city-town-4-14-2020.docx")
 city_df <- docx_extract_all_tbls(city_word)[[1]]
 
 # Pre-processed numbers
