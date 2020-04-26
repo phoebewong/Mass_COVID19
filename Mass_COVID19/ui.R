@@ -5,9 +5,11 @@ library(plotly)
 sidebar <- dashboardSidebar(
     sidebarMenu(
     menuItem("Overview", tabName = "track", icon = icon("signal")),
-    menuItem("Numbers by City", tabName = "city", icon = icon("building")),
+    menuItem("City", icon = icon("building"), startExpanded=TRUE,
+             menuSubItem("Numbers", tabName = "city"),
+             menuSubItem("Map", tabName = "map")),
     menuItem("Numbers by Demo Group", tabName = "demo", icon = icon("user")),
-    menuItem("Map", tabName = "map", icon = icon("map")),
+    # menuItem("Map", tabName = "map", icon = icon("map")),
     menuItem("More Information", tabName = "info", icon = icon("info"))
     )
 )
