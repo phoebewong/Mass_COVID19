@@ -5,18 +5,103 @@ library(plotly)
 sidebar <- dashboardSidebar(
     sidebarMenu(
     menuItem("Overview", tabName = "track", icon = icon("signal")),
-    menuItem("Numbers By Group", tabName = "dashboard", icon = icon("dashboard")),
-    menuItem("Map", tabName = "map", icon = icon("map")),
+    menuItem("Testing", tabName = "test", icon = icon("file")),
+    menuItem("City (Weekly Update)", icon = icon("building"), startExpanded=TRUE,
+             menuSubItem("Numbers", tabName = "city"),
+             menuSubItem("Map", tabName = "map")),
+    menuItem("Numbers by Demo Group", tabName = "demo", icon = icon("user")),
+    # menuItem("Map", tabName = "map", icon = icon("map")),
     menuItem("More Information", tabName = "info", icon = icon("info"))
     )
 )
 
 body <- dashboardBody(
     tabItems(
-        #### Dashboard tab ####
-        tabItem(tabName = "dashboard",
+        #### Overview tab ####
+        tabItem(tabName = "track",
+                # Value boxes
+                fluidRow(
+                    valueBoxOutput("num_case_box"),
+                    valueBoxOutput("death_count"),
+                    valueBoxOutput("test_count")
+                ),
+                fluidRow(
+                    boxPlus(title = "Number of Confirmed Cases and Deaths - Cumulative and Daily",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            width = 6,
+                            plotlyOutput("num_case_overlay"),
+                            plotlyOutput("death_overlay")
+                            ),
+                    boxPlus(title = "Daily Confirmed Cases and Deaths Only",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            width = 6,
+                            # plotlyOutput("death_overlay")
+                            plotlyOutput("daily_num_case_line"),
+                            plotlyOutput("daily_death_line")
+                            )#,
+                    # boxPlus(title = "Testing Results and Availability",
+                    #         solidHeader = FALSE,
+                    #         status = 'primary',
+                    #         collapsible=TRUE,
+                    #         closable=FALSE,
+                    #         width=12,
+                    #         plotlyOutput("test_pct_line"),
+                    #         plotOutput("test_bar")
+                    # )
+        )),
+        tabItem(tabName = "test",
+                fluidRow(
+                    boxPlus(title = "Testing Results and Availability",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            width=12,
+                            plotlyOutput("test_pct_line"),
+                            plotOutput("test_bar")
+                    )
+                )),
+        #### City tab ####
+        tabItem(tabName = "city",
+                fluidRow(
+                    boxPlus(title = "Number of Confirmed Cases by City",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            # width = 12,
+                            plotOutput("city_trace_num")),
+                    boxPlus(title = "Rate (per 100k) by City",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            # width = 12,
+                            plotOutput("city_trace_rate")),
+                    boxPlus(title = "Case Distribution by City (Weekly Update)",
+                            footer = "Last update: 4/22/2020",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            sliderInput("top_num", "Number of cities to show",
+                                        min = 0, max = 352, value = 20),
+                            plotOutput("city_bar"),
+                            checkboxInput("topcount", "Show in absolute count", FALSE))
+                    )
+                ),
+                
+        #### Demo group tab ####
+        tabItem(tabName = "demo",
                 # Boxes need to be put in a row (or column)
                 fluidRow(
+                    h3("Data as of Apr 19, 2020 for this page"),
                     checkboxInput("perc_box", "Show in %", FALSE),
                     boxPlus(title = "County",
                             solidHeader = FALSE,
@@ -37,60 +122,8 @@ body <- dashboardBody(
                             status = 'primary',
                             collapsible=TRUE,
                             closable=FALSE,
-                            plotOutput("age_bar")),
-                    boxPlus(title = "City (Weekly Update)",
-                            footer = "Last update: 4/14/2020",
-                            solidHeader = FALSE,
-                            status = 'primary',
-                            collapsible=TRUE,
-                            closable=FALSE,
-                            sliderInput("top_num", "Number of cities to show",
-                                        min = 0, max = 352, value = 20),
-                            plotOutput("city_bar"),
-                            checkboxInput("topcount", "Show in absolute count", FALSE))
+                            plotOutput("age_bar"))
                 )),
-        #### Track tab ####
-        tabItem(tabName = "track",
-                # Value boxes
-                fluidRow(
-                    valueBoxOutput("num_case_box"),
-                    valueBoxOutput("death_count")
-                ),
-                fluidRow(
-                    boxPlus(title = "Number of Confirmed Cases and Deaths - Cumulative and Daily",
-                            solidHeader = FALSE,
-                            status = 'primary',
-                            collapsible=TRUE,
-                            closable=FALSE,
-                            width = 6,
-                            plotlyOutput("num_case_overlay"),
-                            plotlyOutput("death_overlay")
-                            
-                            ),
-                    # boxPlus(title = "Cumulative COVID-19 Related Deaths",
-                    #         solidHeader = FALSE,
-                    #         status = 'primary',
-                    #         collapsible=TRUE,
-                    #         closable=FALSE,
-                    #         plotlyOutput("death_line")),
-                    boxPlus(title = "Daily Confirmed Cases and Deaths Only",
-                            solidHeader = FALSE,
-                            status = 'primary',
-                            collapsible=TRUE,
-                            closable=FALSE,
-                            width = 6,
-                            # plotlyOutput("death_overlay")
-                            plotlyOutput("daily_num_case_line"),
-                            plotlyOutput("daily_death_line")
-                            )#,
-                    # boxPlus(title = "Daily Deaths",
-                            # solidHeader = FALSE,
-                            # status = 'primary',
-                            # collapsible=TRUE,
-                            # closable=FALSE,
-                            # plotlyOutput("daily_death_line"))
-                            # 
-        )),
         #### Map ####
         tabItem(tabName = "map",
                 # Boxes need to be put in a row (or column)
@@ -102,7 +135,7 @@ body <- dashboardBody(
                     )
                 ),
 
-         #### Info tab ####
+        #### Info tab ####
         tabItem(tabName = "info",
                 fluidRow(
                     box(includeMarkdown('info.md'), width = 12),

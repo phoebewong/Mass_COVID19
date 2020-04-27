@@ -11,12 +11,17 @@ library(ggpubr)
 function(input, output) {
     #### Value boxes ####
     output$num_case_box <- renderValueBox({
-        valueBox(tbls[[2]]$Confirmed.CasesN.... %>% last() %>% as.numeric(), 
+        valueBox(last(num_case_trace_df$total), 
                  "Reported Confirmed Cases", icon = icon('user-circle'), color = "orange")
     })
     output$death_count <- renderValueBox({
-        valueBox(tbls[[2]]$DeathsN.... %>% last() %>% as.numeric(), 
+        valueBox(last(death_trace_df$total), 
                  "Total Deaths", color = "maroon")
+    })
+    output$test_count <- renderValueBox({
+        valueBox(round(last(test_df$pct_pos) * 100, 1), 
+                 # subtitle = glue("{round(last(test_df$pct_pos) * 100, 1)} % positive test results"),
+                 "% of Positive Results of Tests Performed Today",  icon = icon('file'), color = "teal")
     })
     #### TODO: last update time ####
     output$menu_date <- renderMenu({
@@ -135,14 +140,15 @@ function(input, output) {
     })
     #### city plot ####
     output$city_bar <- renderPlot({
-        city_df <- city_df %>% 
-            rename(city = City.Town,
-                   count = Count,
-                   rate = Rate.) %>% 
-            # TODO: clean up less than 5 and 0
-            mutate(count = as.numeric(count), 
-                   rate = as.numeric(rate)) %>% 
-            filter(city != "State Total")
+        city_df <- city_df_all %>% 
+            filter(date == last(date))
+            # rename(city = City.Town,
+            #        count = Count,
+            #        rate = Rate.) %>% 
+            # # TODO: clean up less than 5 and 0
+            # mutate(count = as.numeric(count), 
+            #        rate = as.numeric(rate)) %>% 
+            # filter(city != "State Total")  # most up to date
         
         # Top count
         if (input$topcount){
@@ -264,6 +270,40 @@ function(input, output) {
                   plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
     })
+    ## Test performed ##
+    output$test_pct_line <- renderPlotly({
+        g <- ggplot(test_df, aes(x = date)) +
+            # geom_bar(aes(y = daily), stat = "identity", fill = palettes$value[2]) +
+            geom_line(aes(y = pct_pos), color = palettes$value[1]) +
+            # geom_bar(aes(y = pct_pos), stat = "identity", fill = palettes$value[2]) +
+            theme_minimal() +
+            labs(y = "% of Positive Results",
+                 title = "Percent of Positive Test Results") +
+            scale_fill_tableau() +
+            scale_y_continuous(labels = scales::percent) +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g <- ggplotly(g)
+    })
+    
+    output$test_bar <- renderPlot({
+        g <- ggplot(test_df, aes(x = date)) +
+            geom_bar(aes(y = daily), stat = "identity", fill = palettes$value[1]) +
+            theme_minimal() +
+            labs(y = "Number of Tests Performed",
+                 title = "Number of Tests Performed",
+                 subtitle = glue("Total Test Performed: {sum(test_df$daily)}")) +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g
+    })
     
     output$county_per_cap_reg_line <- renderPlot({
         g <- ggplot(hist_county_df_per_capita, aes(x=POPESTIMATE2019, y = num_case, label = category)) +
@@ -299,4 +339,48 @@ function(input, output) {
              # height = height,
              alt = "City Map - April 22")
     }, deleteFile = FALSE)
+    
+    #### city trace plot ####
+    output$city_trace_num <- renderPlot({
+        top_10_cities_cnt_now <- city_df_all %>%
+            filter(date == last(date)) %>%   # take latest date
+            top_n(n=10, count) %>%  # top 10 count
+            pull(city)
+        
+        # Show those top n cities
+        city_df_all %>% 
+            filter(city %in% top_10_cities_cnt_now) %>% 
+            ggplot(aes(x=date, y = count, color = city)) +
+            geom_line() +
+            labs(y="Number of Confirmed Cases", 
+                 # title = "Number of Confirmed COVID-19 Cases by City",
+                 title = "Top 10 cities with highest number of confirmed cases",
+                 subtitle = glue("Data as of {last(city_df_all$date)}")) +
+            scale_color_tableau() + 
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  plot.title = element_text(face = "bold"))
+        
+    })
+    
+    output$city_trace_rate <- renderPlot({
+        top_10_cities_rate_now <- city_df_all %>% 
+            filter(city != "Unknown1") %>% # filter out unknown
+            filter(date == last(date)) %>% # take latest date
+            top_n(n=10, count) %>%  # top 10 count
+            pull(city)
+        
+        city_df_all %>% 
+            filter(city %in% top_10_cities_rate_now) %>% 
+            ggplot(aes(x=date, y = rate, color = city)) +
+            geom_line() +
+            scale_color_tableau() + 
+            labs(y="Rate per 100k population", 
+                 # title = "Rate (per 100k) of Confirmed COVID-19 Cases by City ",
+                 title = "Top 10 cities with highest rate",
+                 subtitle = glue("Data as of {last(city_df_all$date)}")) +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  plot.title = element_text(face = "bold"))
+    })
 }
