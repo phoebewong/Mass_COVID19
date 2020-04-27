@@ -25,6 +25,7 @@ body <- dashboardBody(
                     valueBoxOutput("death_count"),
                     valueBoxOutput("test_count")
                 ),
+                h3(glue("Data as of: {date(Sys.Date())}")),
                 fluidRow(
                     boxPlus(title = "Number of Confirmed Cases and Deaths - Cumulative and Daily",
                             solidHeader = FALSE,
@@ -101,7 +102,7 @@ body <- dashboardBody(
         tabItem(tabName = "demo",
                 # Boxes need to be put in a row (or column)
                 fluidRow(
-                    h3("Data as of Apr 19, 2020 for this page"),
+                    h3("Data as of Apr 19, 2020 for this page only"),
                     checkboxInput("perc_box", "Show in %", FALSE),
                     boxPlus(title = "County",
                             solidHeader = FALSE,
