@@ -5,7 +5,8 @@ library(plotly)
 sidebar <- dashboardSidebar(
     sidebarMenu(
     menuItem("Overview", tabName = "track", icon = icon("signal")),
-    menuItem("City", icon = icon("building"), startExpanded=TRUE,
+    menuItem("Testing", tabName = "test", icon = icon("file")),
+    menuItem("City (Weekly Update)", icon = icon("building"), startExpanded=TRUE,
              menuSubItem("Numbers", tabName = "city"),
              menuSubItem("Map", tabName = "map")),
     menuItem("Numbers by Demo Group", tabName = "demo", icon = icon("user")),
@@ -21,7 +22,8 @@ body <- dashboardBody(
                 # Value boxes
                 fluidRow(
                     valueBoxOutput("num_case_box"),
-                    valueBoxOutput("death_count")
+                    valueBoxOutput("death_count"),
+                    valueBoxOutput("test_count")
                 ),
                 fluidRow(
                     boxPlus(title = "Number of Confirmed Cases and Deaths - Cumulative and Daily",
@@ -42,8 +44,29 @@ body <- dashboardBody(
                             # plotlyOutput("death_overlay")
                             plotlyOutput("daily_num_case_line"),
                             plotlyOutput("daily_death_line")
-                            )
+                            )#,
+                    # boxPlus(title = "Testing Results and Availability",
+                    #         solidHeader = FALSE,
+                    #         status = 'primary',
+                    #         collapsible=TRUE,
+                    #         closable=FALSE,
+                    #         width=12,
+                    #         plotlyOutput("test_pct_line"),
+                    #         plotOutput("test_bar")
+                    # )
         )),
+        tabItem(tabName = "test",
+                fluidRow(
+                    boxPlus(title = "Testing Results and Availability",
+                            solidHeader = FALSE,
+                            status = 'primary',
+                            collapsible=TRUE,
+                            closable=FALSE,
+                            width=12,
+                            plotlyOutput("test_pct_line"),
+                            plotOutput("test_bar")
+                    )
+                )),
         #### City tab ####
         tabItem(tabName = "city",
                 fluidRow(
@@ -78,6 +101,7 @@ body <- dashboardBody(
         tabItem(tabName = "demo",
                 # Boxes need to be put in a row (or column)
                 fluidRow(
+                    h3("Data as of Apr 19, 2020 for this page"),
                     checkboxInput("perc_box", "Show in %", FALSE),
                     boxPlus(title = "County",
                             solidHeader = FALSE,

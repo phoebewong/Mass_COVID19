@@ -21,6 +21,7 @@ city_df <- docx_extract_all_tbls(city_word)[[1]]
 # Pre-processed numbers
 num_case_trace_df <- readRDS("data/hist/num_case_trace_df.rds")
 death_trace_df <- readRDS("data/hist/death_trace_df.rds")
+test_df <- readRDS("data/hist/test_df.rds")
 hist_county_df <- readRDS("data/hist/hist_county_df.rds")
 city_df_all <- readRDS("data/hist/city_trace_all.rds")
 

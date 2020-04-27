@@ -11,12 +11,17 @@ library(ggpubr)
 function(input, output) {
     #### Value boxes ####
     output$num_case_box <- renderValueBox({
-        valueBox(tbls[[2]]$Confirmed.CasesN.... %>% last() %>% as.numeric(), 
+        valueBox(last(num_case_trace_df$total), 
                  "Reported Confirmed Cases", icon = icon('user-circle'), color = "orange")
     })
     output$death_count <- renderValueBox({
-        valueBox(tbls[[2]]$DeathsN.... %>% last() %>% as.numeric(), 
+        valueBox(last(death_trace_df$total), 
                  "Total Deaths", color = "maroon")
+    })
+    output$test_count <- renderValueBox({
+        valueBox(round(last(test_df$pct_pos) * 100, 1), 
+                 # subtitle = glue("{round(last(test_df$pct_pos) * 100, 1)} % positive test results"),
+                 "% of Positive Results of Tests Performed Today",  icon = icon('file'), color = "teal")
     })
     #### TODO: last update time ####
     output$menu_date <- renderMenu({
@@ -264,6 +269,40 @@ function(input, output) {
                   axis.text.x = element_text(angle=45,margin = margin(t = 20)),
                   plot.title = element_text(face = "bold"))
         g <- ggplotly(g)
+    })
+    ## Test performed ##
+    output$test_pct_line <- renderPlotly({
+        g <- ggplot(test_df, aes(x = date)) +
+            # geom_bar(aes(y = daily), stat = "identity", fill = palettes$value[2]) +
+            geom_line(aes(y = pct_pos), color = palettes$value[1]) +
+            # geom_bar(aes(y = pct_pos), stat = "identity", fill = palettes$value[2]) +
+            theme_minimal() +
+            labs(y = "% of Positive Results",
+                 title = "Percent of Positive Test Results") +
+            scale_fill_tableau() +
+            scale_y_continuous(labels = scales::percent) +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g <- ggplotly(g)
+    })
+    
+    output$test_bar <- renderPlot({
+        g <- ggplot(test_df, aes(x = date)) +
+            geom_bar(aes(y = daily), stat = "identity", fill = palettes$value[1]) +
+            theme_minimal() +
+            labs(y = "Number of Tests Performed",
+                 title = "Number of Tests Performed",
+                 subtitle = glue("Total Test Performed: {sum(test_df$daily)}")) +
+            scale_fill_tableau() +
+            scale_x_date(date_breaks= "3 days", date_minor_breaks = "1 day") +
+            theme_minimal() +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle=45,margin = margin(t = 20)),
+                  plot.title = element_text(face = "bold"))
+        g
     })
     
     output$county_per_cap_reg_line <- renderPlot({
