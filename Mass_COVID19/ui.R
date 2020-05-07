@@ -1,6 +1,7 @@
 library(shinydashboard)
 library(shinydashboardPlus)
 library(plotly)
+library(glue)
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
@@ -86,7 +87,7 @@ body <- dashboardBody(
                             # width = 12,
                             plotOutput("city_trace_rate")),
                     boxPlus(title = "Case Distribution by City (Weekly Update)",
-                            footer = "Last update: 4/22/2020",
+                            footer = "Last update: 4/29/2020",
                             solidHeader = FALSE,
                             status = 'primary',
                             collapsible=TRUE,
